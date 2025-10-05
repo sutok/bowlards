@@ -1,0 +1,8 @@
+- .cursor/rules/*.mdcを読み込むこと
+- .cursor/rules/*.mdcを読み込んだら、そのルールに従って回答すること
+- 会話は日本語で行うこと
+- 出力は日本語で行うこと
+- dockerコマンドの代わりにpodmanを利用すること
+- docker-cliはインストールしていない
+- docker-desktopはインストールしていない
+

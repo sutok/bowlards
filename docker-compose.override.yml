@@ -1,0 +1,17 @@
+services:
+  frontend:
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+
+  backend:
+    volumes:
+      - ./backend:/app
+      - /app/vendor
+    environment:
+      - CGO_ENABLED=0
+      - GOOS=linux
+      - GOARCH=amd64

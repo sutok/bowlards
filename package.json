@@ -1,0 +1,28 @@
+{
+  "name": "bowlards-dev",
+  "version": "1.0.0",
+  "description": "Scoring Bawlards/Bowling Development Environment",
+  "scripts": {
+    "dev": "docker-compose up -d",
+    "dev:build": "docker-compose up --build -d",
+    "dev:down": "docker-compose down",
+    "dev:logs": "docker-compose logs -f",
+    "dev:clean": "docker-compose down -v --remove-orphans",
+    "db:migrate": "docker-compose exec backend go run cmd/migrate/main.go",
+    "db:seed": "docker-compose exec backend go run cmd/seed/main.go",
+    "test": "docker-compose exec backend go test ./...",
+    "test:frontend": "docker-compose exec frontend npm test",
+    "lint:backend": "docker-compose exec backend golangci-lint run",
+    "lint:frontend": "docker-compose exec frontend npm run lint"
+  },
+  "keywords": [
+    "bowling",
+    "score",
+    "react",
+    "go",
+    "docker",
+    "firebase"
+  ],
+  "author": "System Engineer",
+  "license": "MIT"
+}

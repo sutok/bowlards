@@ -1,0 +1,119 @@
+---
+description: backendにblowlardsのスコアとユーザー管理をするためのAPIサーバーを構築
+globs: backend
+alwaysApply: false
+---
+ターゲットが SES案件 で、かつ Firebase 認証を組み込んだ Go API サーバー をポートフォリオにしたいなら、以下の方向性が一番「商用案件を即こなせる」アピールになります。
+
+⸻
+
+🎯 SES案件ポートフォリオの戦略
+
+1. 技術スタック（Go版 FastAPI+Pydantic 体験に近い構成）
+	•	Webフレームワーク:
+	•	Gin（採用実績が最も多く、商用でもよく見かける）
+	•	EchoでもOKだが、SES案件での求人票を見ると Ginの記載率が高い
+	•	認証:
+	•	Firebase Auth（IDトークンをAPIで検証）
+	•	Goでは公式SDKがあるので firebase.google.com/go/v4 を利用
+	•	サーバー側で Authorization: Bearer <id_token> を受け取り → Firebase SDK or REST APIで検証
+	•	バリデーション:
+	•	go-playground/validator/v10
+	•	DTO struct のタグで制約を書く → Pydanticの代替
+	•	APIドキュメント:
+	•	swaggo/swag + Swagger UI
+	•	SES案件で「API仕様書ありますか？」に即答できる強力な武器
+	•	データ層:
+	•	DBは PostgreSQL or MySQL
+	•	ORMは GORM が標準的（sqlcは金融系SESだと高評価）
+	•	運用/補助ツール:
+	•	Docker + docker-compose
+	•	Makefile（lint/test/build/run）
+	•	CI/CDは GitHub Actions
+	•	環境変数は .env + spf13/viper
+
+⸻
+
+2. 認証処理の流れ（Firebase連携）
+	1.	フロントエンド（Web/モバイル）で Firebase Auth にログイン
+	2.	IDトークンを取得し、APIリクエストの Authorization ヘッダーに付与
+	3.	APIサーバー（Go Gin）が受け取って Firebase SDKで検証
+
+import (
+    "context"
+    "firebase.google.com/go/v4"
+    "firebase.google.com/go/v4/auth"
+    "google.golang.org/api/option"
+    "github.com/gin-gonic/gin"
+    "net/http"
+)
+
+func FirebaseAuthMiddleware(app *firebase.App) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        client, _ := app.Auth(context.Background())
+        idToken := c.GetHeader("Authorization")
+        if idToken == "" {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
+            return
+        }
+
+        token, err := client.VerifyIDToken(context.Background(), idToken[len("Bearer "):])
+        if err != nil {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+            return
+        }
+
+        c.Set("uid", token.UID)
+        c.Next()
+    }
+}
+
+👉 Pydantic的「検証」= Firebase SDK がやってくれるので、安心感を持たせられる。
+
+⸻
+
+3. ポートフォリオに向く題材
+
+SES案件を意識するなら、**「業務システム風」**が刺さります。
+（単なるTODOアプリでは差別化できない）
+
+✅ 候補例
+	1.	ユーザー管理API（Firebase認証必須）
+	•	CRUD + 権限付きエンドポイント
+	•	例：一般ユーザーは自分のデータのみ更新、管理者は全体を管理
+	2.	予約管理システム（カレンダー + Firebase Auth）
+	•	User / Reservation モデル
+	•	Firebase Auth でログイン → 自分の予約だけ取得・変更可能
+	3.	タスク進捗管理（SES現場に近い）
+	•	Firebase Auth で社員/管理者を分ける
+	•	管理者はタスク割当API、社員は自分のタスク進捗を更新
+
+⸻
+
+4. 見せ方の工夫（SES案件で評価されるポイント）
+	•	READMEに構成図を載せる
+	•	認証フロー図（Firebase → API → DB）
+	•	コンテナ図（Docker Compose: API, DB, Swagger UI）
+	•	Swagger UIのスクショを貼る
+→ 「API設計できる」ことが伝わる
+	•	Firebase Authの検証コードを強調
+→ 「商用案件で必須のセキュリティを実装した」ことがアピールできる
+	•	ディレクトリ構成を綺麗に保つ
+
+```
+go-portfolio/
+├── cmd/
+│   └── server/main.go
+├── internal/
+│   ├── api/        # handler
+│   ├── service/    # business logic
+│   ├── repository/ # DB
+│   ├── model/      # DTO
+│   └── auth/       # Firebase middleware
+├── docs/           # swagger
+├── Dockerfile
+├── docker-compose.yml
+└── Makefile
+```
+
+

@@ -21,13 +21,16 @@ import {
   DialogContent,
   DialogActions,
   Pagination,
-  CircularProgress
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SportsIcon from '@mui/icons-material/Sports';
+import { gameService } from '../services/gameService';
+import { auth } from '../firebase/config';
 
 interface GameSummary {
   id: string;
@@ -51,45 +54,52 @@ export default function GameHistory({ onViewGameDetail }: GameHistoryProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [gameToDelete, setGameToDelete] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const itemsPerPage = 10;
 
-  // モックデータ（実際の実装ではAPIから取得）
+  // ゲーム履歴を取得
   useEffect(() => {
-    const mockGames: GameSummary[] = [
-      {
-        id: '1',
-        gameDate: '2024-01-15T10:30:00Z',
-        totalScore: 180,
-        strikes: 3,
-        spares: 2,
-        status: 'completed',
-        duration: 45
-      },
-      {
-        id: '2',
-        gameDate: '2024-01-14T15:20:00Z',
-        totalScore: 165,
-        strikes: 2,
-        spares: 4,
-        status: 'completed',
-        duration: 50
-      },
-      {
-        id: '3',
-        gameDate: '2024-01-13T09:15:00Z',
-        totalScore: 195,
-        strikes: 5,
-        spares: 1,
-        status: 'completed',
-        duration: 40
-      }
-    ];
+    fetchGames();
+  }, [currentPage]);
 
-    setTimeout(() => {
-      setGames(mockGames);
-      setTotalPages(1);
+  const fetchGames = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        setError('ログインが必要です');
+        setLoading(false);
+        return;
+      }
+
+      const offset = (currentPage - 1) * itemsPerPage;
+      const result = await gameService.getGameHistory(itemsPerPage, offset);
+
+      console.log('📊 取得したゲーム履歴:', result);
+
+      // バックエンドから取得したデータをGameSummary形式に変換
+      const gameSummaries: GameSummary[] = result.games.map(game => ({
+        id: game.id,
+        gameDate: game.gameDate,
+        totalScore: game.totalScore,
+        strikes: game.frames?.filter(f => f.isStrike).length || 0,
+        spares: game.frames?.filter(f => f.isSpare).length || 0,
+        status: game.status as 'completed' | 'in_progress',
+        duration: undefined
+      }));
+
+      setGames(gameSummaries);
+      setTotalPages(Math.ceil(result.total / itemsPerPage));
       setLoading(false);
-    }, 1000);
-  }, []);
+    } catch (error: any) {
+      console.error('❌ ゲーム履歴取得エラー:', error);
+      setError(error.message || 'ゲーム履歴の取得に失敗しました');
+      setGames([]);
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -107,17 +117,27 @@ export default function GameHistory({ onViewGameDetail }: GameHistoryProps) {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (gameToDelete) {
-      setGames(games.filter(game => game.id !== gameToDelete));
+  const confirmDelete = async () => {
+    if (!gameToDelete) return;
+
+    try {
+      await gameService.deleteGame(gameToDelete);
+      console.log('✅ ゲームを削除しました:', gameToDelete);
+      
+      // ゲーム一覧を更新
+      await fetchGames();
+      
       setGameToDelete(null);
+      setDeleteDialogOpen(false);
+    } catch (error: any) {
+      console.error('❌ ゲーム削除エラー:', error);
+      setError(error.message || 'ゲームの削除に失敗しました');
       setDeleteDialogOpen(false);
     }
   };
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
     setCurrentPage(page);
-    // 実際の実装ではAPIを呼び出してページデータを取得
   };
 
   if (loading) {
@@ -147,6 +167,12 @@ export default function GameHistory({ onViewGameDetail }: GameHistoryProps) {
         <Typography variant="h4" gutterBottom>
           ゲーム履歴
         </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
 
         {games.length === 0 ? (
           <Paper sx={{ p: 4, textAlign: 'center' }}>

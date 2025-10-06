@@ -126,16 +126,39 @@ class GameRepository:
     ) -> GameHistoryResponse:
         """ユーザーのゲーム履歴を取得"""
         try:
-            query = self.db.collection(self.collection).where("user_id", "==", user_id)
+            logger.info(f"🔍 Searching games for user_id: {user_id}")
+            logger.info(f"   Collection: {self.collection}")
+            logger.info(f"   Limit: {history_request.limit}, Offset: {history_request.offset}")
+            logger.info(f"   Status filter: {history_request.status}")
+            
+            # user_idで検索
+            query = self.db.collection(self.collection).where(
+                field_path="user_id",
+                op_string="==",
+                value=user_id
+            )
             
             # ステータスフィルター
             if history_request.status:
-                query = query.where("status", "==", history_request.status)
+                query = query.where(
+                    field_path="status",
+                    op_string="==",
+                    value=history_request.status
+                )
+            
+            # デバッグ: 全ゲームドキュメントを確認
+            all_docs = list(self.db.collection(self.collection).stream())
+            logger.info(f"📚 Total games in collection: {len(all_docs)}")
+            if all_docs:
+                sample_game = all_docs[0].to_dict()
+                logger.info(f"   Sample game data: {{'user_id': '{sample_game.get('user_id')}', 'status': '{sample_game.get('status')}'}}")
             
             # 総件数を取得
             total_query = query
             total_docs = list(total_query.stream())
             total = len(total_docs)
+            
+            logger.info(f"   Found {total} games matching user_id: {user_id}")
             
             # ページネーション
             query = query.order_by("played_at", direction=firestore.Query.DESCENDING)
@@ -149,7 +172,7 @@ class GameRepository:
                 game_data['id'] = doc.id
                 games.append(GameSchema(**game_data))
             
-            logger.info(f"Retrieved {len(games)} games for user {user_id}")
+            logger.info(f"✅ Retrieved {len(games)} games for user {user_id} (total: {total})")
             return GameHistoryResponse(
                 games=games,
                 total=total,
@@ -158,15 +181,27 @@ class GameRepository:
             )
             
         except Exception as e:
-            logger.error(f"Failed to get user games for {user_id}: {e}")
+            logger.error(f"❌ Failed to get user games for {user_id}: {e}")
             raise
     
     async def get_user_statistics(self, user_id: str) -> dict:
         """ユーザーのゲーム統計を取得"""
         try:
+            logger.info(f"📊 Getting statistics for user_id: {user_id}")
+            
             # 完了したゲームのみを取得
-            query = self.db.collection(self.collection).where("user_id", "==", user_id).where("status", "==", "completed")
+            query = self.db.collection(self.collection).where(
+                field_path="user_id",
+                op_string="==",
+                value=user_id
+            ).where(
+                field_path="status",
+                op_string="==",
+                value="completed"
+            )
             docs = list(query.stream())
+            
+            logger.info(f"   Found {len(docs)} completed games")
             
             if not docs:
                 return {

@@ -95,12 +95,67 @@ async def create_game(
         uid = current_user.get("uid")
         game = await game_service.create_game(uid)
         return success_response(data=game.dict())
-        
+
     except ValueError as e:
         return error_response("USER_NOT_FOUND", str(e))
     except Exception as e:
         logger.error(f"Failed to create game: {e}")
         return error_response("CREATE_FAILED", "Failed to create game")
+
+
+@router.get("/history", response_model=Dict[str, Any])
+async def get_game_history(
+    limit: int = 20,
+    offset: int = 0,
+    status: str = None,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    game_service: GameService = Depends(get_game_service)
+):
+    """ゲーム履歴を取得"""
+    try:
+        logger.info(f"📊 [ROUTER] get_game_history called for uid: {current_user.get('uid')}")
+        logger.info(f"   Params: limit={limit}, offset={offset}, status={status}")
+
+        uid = current_user.get("uid")
+        history_request = GameHistoryRequest(
+            limit=limit,
+            offset=offset,
+            status=status
+        )
+        history = await game_service.get_game_history(uid, history_request)
+
+        logger.info(f"✅ [ROUTER] Received {len(history.games)} games from service")
+
+        meta = MetaInfo(
+            total=history.total,
+            limit=history.limit,
+            offset=history.offset
+        )
+
+        return success_response(
+            data=[game.dict() for game in history.games],
+            meta=meta
+        )
+
+    except Exception as e:
+        logger.error(f"❌ [ROUTER] Failed to get game history: {e}", exc_info=True)
+        return error_response("GET_FAILED", "Failed to get game history")
+
+
+@router.get("/statistics", response_model=Dict[str, Any])
+async def get_game_statistics(
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    game_service: GameService = Depends(get_game_service)
+):
+    """ゲーム統計を取得"""
+    try:
+        uid = current_user.get("uid")
+        stats = await game_service.get_game_statistics(uid)
+        return success_response(data=stats.dict())
+
+    except Exception as e:
+        logger.error(f"Failed to get game statistics: {e}")
+        return error_response("GET_FAILED", "Failed to get game statistics")
 
 
 @router.get("/{game_id}", response_model=Dict[str, Any])
@@ -157,59 +212,9 @@ async def delete_game(
         uid = current_user.get("uid")
         await game_service.delete_game(game_id, uid)
         return success_response(data={"message": "Game deleted successfully"})
-        
+
     except GameNotFoundError:
         return error_response("GAME_NOT_FOUND", "Game not found")
     except Exception as e:
         logger.error(f"Failed to delete game {game_id}: {e}")
         return error_response("DELETE_FAILED", "Failed to delete game")
-
-
-@router.get("/history", response_model=Dict[str, Any])
-async def get_game_history(
-    limit: int = 20,
-    offset: int = 0,
-    status: str = None,
-    current_user: Dict[str, Any] = Depends(get_current_user),
-    game_service: GameService = Depends(get_game_service)
-):
-    """ゲーム履歴を取得"""
-    try:
-        uid = current_user.get("uid")
-        history_request = GameHistoryRequest(
-            limit=limit,
-            offset=offset,
-            status=status
-        )
-        history = await game_service.get_game_history(uid, history_request)
-        
-        meta = MetaInfo(
-            total=history.total,
-            limit=history.limit,
-            offset=history.offset
-        )
-        
-        return success_response(
-            data=[game.dict() for game in history.games],
-            meta=meta
-        )
-        
-    except Exception as e:
-        logger.error(f"Failed to get game history: {e}")
-        return error_response("GET_FAILED", "Failed to get game history")
-
-
-@router.get("/statistics", response_model=Dict[str, Any])
-async def get_game_statistics(
-    current_user: Dict[str, Any] = Depends(get_current_user),
-    game_service: GameService = Depends(get_game_service)
-):
-    """ゲーム統計を取得"""
-    try:
-        uid = current_user.get("uid")
-        stats = await game_service.get_game_statistics(uid)
-        return success_response(data=stats.dict())
-        
-    except Exception as e:
-        logger.error(f"Failed to get game statistics: {e}")
-        return error_response("GET_FAILED", "Failed to get game statistics")

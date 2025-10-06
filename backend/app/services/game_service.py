@@ -183,8 +183,13 @@ class GameService:
     async def get_game_history(self, user_id: str, history_request: GameHistoryRequest) -> GameHistoryResponse:
         """ゲーム履歴を取得"""
         try:
+            logger.info(f"🔧 [SERVICE] get_game_history called for user_id: {user_id}")
+            logger.info(f"   Request: limit={history_request.limit}, offset={history_request.offset}, status={history_request.status}")
+
             history_response = await self.game_repo.get_user_games(user_id, history_request)
-            
+
+            logger.info(f"✅ [SERVICE] Repository returned {len(history_response.games)} games")
+
             # GameSchemaをGameResponseに変換
             games = []
             for game_schema in history_response.games:
@@ -198,16 +203,18 @@ class GameService:
                     created_at=game_schema.created_at,
                     updated_at=game_schema.updated_at
                 ))
-            
+
+            logger.info(f"✅ [SERVICE] Converted to {len(games)} GameResponse objects")
+
             return GameHistoryResponse(
                 games=games,
                 total=history_response.total,
                 limit=history_response.limit,
                 offset=history_response.offset
             )
-            
+
         except Exception as e:
-            logger.error(f"Failed to get game history for user {user_id}: {e}")
+            logger.error(f"❌ [SERVICE] Failed to get game history for user {user_id}: {e}", exc_info=True)
             raise
     
     async def get_game_statistics(self, user_id: str) -> GameStatistics:

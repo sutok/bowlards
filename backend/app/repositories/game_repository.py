@@ -181,7 +181,7 @@ class GameRepository:
             )
             
         except Exception as e:
-            logger.error(f"❌ Failed to get user games for {user_id}: {e}")
+            logger.error(f"❌ Failed to get user games for {user_id}: {e}", exc_info=True)
             raise
     
     async def get_user_statistics(self, user_id: str) -> dict:

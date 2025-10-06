@@ -118,9 +118,12 @@ class UserService:
     async def get_or_create_user(self, uid: str, email: str, display_name: str, photo_url: Optional[str] = None) -> UserResponse:
         """ユーザーを取得または作成"""
         try:
+            logger.info(f"🔍 [SERVICE] get_or_create_user called for uid: {uid}")
+
             # 既存ユーザーを取得
             existing_user = await self.user_repo.get_by_uid(uid)
             if existing_user:
+                logger.info(f"✅ [SERVICE] User found: {existing_user.id}")
                 return UserResponse(
                     id=existing_user.id,
                     uid=existing_user.uid,
@@ -130,17 +133,20 @@ class UserService:
                     created_at=existing_user.created_at,
                     updated_at=existing_user.updated_at
                 )
-            
+
             # 新規ユーザー作成
+            logger.info(f"📝 [SERVICE] Creating new user for uid: {uid}")
             user_data = UserCreate(
                 uid=uid,
                 email=email,
                 display_name=display_name,
                 photo_url=photo_url
             )
-            
-            return await self.create_user(user_data)
-            
+
+            new_user = await self.create_user(user_data)
+            logger.info(f"✅ [SERVICE] New user created: {new_user.id}")
+            return new_user
+
         except Exception as e:
-            logger.error(f"Failed to get or create user {uid}: {e}")
+            logger.error(f"❌ [SERVICE] Failed to get or create user {uid}: {e}", exc_info=True)
             raise

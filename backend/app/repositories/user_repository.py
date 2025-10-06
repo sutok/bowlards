@@ -64,18 +64,21 @@ class UserRepository:
     async def get_by_uid(self, uid: str) -> Optional[UserSchema]:
         """Firebase UIDでユーザーを取得"""
         try:
+            logger.info(f"🔍 [REPO] Searching for user with uid: {uid}")
             query = self.db.collection(self.collection).where("uid", "==", uid).limit(1)
             docs = query.stream()
-            
+
             for doc in docs:
+                logger.info(f"✅ [REPO] User found: {doc.id}")
                 user_data = doc.to_dict()
                 user_data['id'] = doc.id
                 return UserSchema(**user_data)
-            
+
+            logger.info(f"ℹ️ [REPO] User not found with uid: {uid}")
             return None
-            
+
         except Exception as e:
-            logger.error(f"Failed to get user by UID {uid}: {e}")
+            logger.error(f"❌ [REPO] Failed to get user by UID {uid}: {e}", exc_info=True)
             raise
     
     async def update(self, user_id: str, user_data: UserUpdate) -> UserSchema:

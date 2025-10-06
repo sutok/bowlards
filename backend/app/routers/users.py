@@ -30,16 +30,19 @@ async def get_user_profile(
 ):
     """
     ユーザープロフィールを取得（存在しない場合は自動作成）
-    
+
     Firebase認証トークンからユーザー情報を取得し、
     Firestoreに存在しない場合は自動的に作成します。
     """
     try:
+        logger.info(f"👤 [ROUTER] get_user_profile called")
         uid = current_user.get("uid")
         email = current_user.get("email", "")
         display_name = current_user.get("name") or current_user.get("display_name") or email.split("@")[0]
         photo_url = current_user.get("picture") or current_user.get("photo_url")
-        
+
+        logger.info(f"👤 [ROUTER] User info - uid: {uid}, email: {email}, display_name: {display_name}")
+
         # ユーザーを取得または作成
         user = await user_service.get_or_create_user(
             uid=uid,
@@ -47,10 +50,12 @@ async def get_user_profile(
             display_name=display_name,
             photo_url=photo_url
         )
+
+        logger.info(f"✅ [ROUTER] User profile retrieved successfully: {user.id}")
         return success_response(data=user.dict())
-        
+
     except Exception as e:
-        logger.error(f"Failed to get or create user profile: {e}")
+        logger.error(f"❌ [ROUTER] Failed to get or create user profile: {e}", exc_info=True)
         return error_response("GET_FAILED", f"Failed to get user profile: {str(e)}")
 
 

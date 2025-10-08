@@ -80,12 +80,12 @@ export default function GameHistory({ onViewGameDetail }: GameHistoryProps) {
       console.log('📊 取得したゲーム履歴:', result);
 
       // バックエンドから取得したデータをGameSummary形式に変換
-      const gameSummaries: GameSummary[] = result.games.map(game => ({
+      const gameSummaries: GameSummary[] = result.games.map((game: any) => ({
         id: game.id,
-        gameDate: game.gameDate,
-        totalScore: game.totalScore,
-        strikes: game.frames?.filter(f => f.isStrike).length || 0,
-        spares: game.frames?.filter(f => f.isSpare).length || 0,
+        gameDate: game.played_at || game.gameDate || game.created_at,
+        totalScore: game.total_score || game.totalScore || 0,
+        strikes: game.frames?.filter((f: any) => f.is_strike || f.isStrike).length || 0,
+        spares: game.frames?.filter((f: any) => f.is_spare || f.isSpare).length || 0,
         status: game.status as 'completed' | 'in_progress',
         duration: undefined
       }));
@@ -214,7 +214,10 @@ export default function GameHistory({ onViewGameDetail }: GameHistoryProps) {
                       平均スコア
                     </Typography>
                     <Typography variant="h4" color="secondary">
-                      {Math.round(games.reduce((sum, game) => sum + game.totalScore, 0) / games.length)}
+                      {games.length > 0
+                        ? Math.round(games.reduce((sum, game) => sum + game.totalScore, 0) / games.length)
+                        : 0
+                      }
                     </Typography>
                   </CardContent>
                 </Card>
@@ -226,7 +229,10 @@ export default function GameHistory({ onViewGameDetail }: GameHistoryProps) {
                       最高スコア
                     </Typography>
                     <Typography variant="h4" color="success.main">
-                      {Math.max(...games.map(game => game.totalScore))}
+                      {games.length > 0
+                        ? Math.max(...games.map(game => game.totalScore))
+                        : 0
+                      }
                     </Typography>
                   </CardContent>
                 </Card>

@@ -3,8 +3,6 @@ import {
   Box,
   Button,
   Typography,
-  Card,
-  CardContent,
   Grid,
   Container,
   Paper,
@@ -14,7 +12,6 @@ import { useNavigate } from 'react-router-dom';
 import { User } from 'firebase/auth';
 import SportsIcon from '@mui/icons-material/Sports';
 import HistoryIcon from '@mui/icons-material/History';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 interface DashboardProps {
   user: User;
@@ -83,59 +80,6 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
           </Grid>
         </Paper>
 
-        {/* 統計情報カード */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <SportsIcon color="primary" sx={{ mr: 1 }} />
-                  <Typography variant="h6">総ゲーム数</Typography>
-                </Box>
-                <Typography variant="h4" color="primary">
-                  0
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  記録されたゲーム数
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <TrendingUpIcon color="secondary" sx={{ mr: 1 }} />
-                  <Typography variant="h6">平均スコア</Typography>
-                </Box>
-                <Typography variant="h4" color="secondary">
-                  -
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  過去のゲーム平均
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <HistoryIcon color="success" sx={{ mr: 1 }} />
-                  <Typography variant="h6">最高スコア</Typography>
-                </Box>
-                <Typography variant="h4" color="success.main">
-                  -
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  記録された最高スコア
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
 
       </Box>
     </Container>

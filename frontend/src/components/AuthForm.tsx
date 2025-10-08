@@ -50,7 +50,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function AuthForm({ onAuthStateChange }: AuthFormProps) {
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(1); // デフォルトでログインタブを表示
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

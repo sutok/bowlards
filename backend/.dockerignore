@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# IDE
+.idea/
+.vscode/
+.cursor/
+.serena/
+
+# Documentation build
+docs/_build/
+site/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+firebase-debug.log
+firebase-debug.*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials
+credentials/
+credentials.json
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# uv lock file (not needed in container)
+uv.lock

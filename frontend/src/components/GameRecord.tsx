@@ -226,12 +226,12 @@ export default function GameRecord() {
   // Double（2連続ストライク）の判定（「completed」且つ「isStrike」が2つ連続）
   const isDouble = (frames: Frame[], frameIndex: number): boolean => {
     // フレーム10の場合
-    if (frameIndex == 9 && frames[frameIndex].firstRoll == 10 
-      && frames[frameIndex].secondRoll == 10 && frames[frameIndex].thirdRoll < 10) {
+    if (frameIndex == 9 && frames[frameIndex].firstRoll == 10
+      && frames[frameIndex].secondRoll == 10 && (frames[frameIndex].thirdRoll ?? 0) < 10) {
         return true;
     }
     // フレーム9の場合
-    else if (frameIndex == 8 && frames[frameIndex].isCompleted && frames[frameIndex].isStrike == true 
+    else if (frameIndex == 8 && frames[frameIndex].isCompleted && frames[frameIndex].isStrike == true
       && frames[(frameIndex+1)].firstRoll == 10 && frames[(frameIndex+1)].secondRoll == 10) {
       return true;
     }
@@ -247,7 +247,7 @@ export default function GameRecord() {
   const isSingleStrike = (frames: Frame[], frameIndex: number): boolean => {
     // フレーム10の場合
     if (frameIndex == 9 && frames[frameIndex].firstRoll == 10
-      && frames[frameIndex].secondRoll < 10 && frames[frameIndex].thirdRoll < 10) {
+      && (frames[frameIndex].secondRoll ?? 0) < 10 && (frames[frameIndex].thirdRoll ?? 0) < 10) {
         return true;
     }
     // フレーム9以前の場合: 現在のフレームがストライクで、次のフレームがストライクでない

@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     debug: bool = False
     
     # Firebase設定
-    firebase_project_id: str
-    firebase_credentials_path: Optional[str] = None
+    firebase_project_id: str = "bowlards-dev"
+    firebase_credentials_path: Optional[str] = "./credentials/bowlards-dev-877e4635f23c.json"
     firebase_private_key: Optional[str] = None
     firebase_client_email: Optional[str] = None
     

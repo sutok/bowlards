@@ -16,10 +16,32 @@ class FirebaseAuth:
         self._initialize_firebase()
 
     def _initialize_firebase(self):
-        """Firebase Admin SDKを初期化（本番環境用）"""
+        """Firebase Admin SDKを初期化（エミュレータ対応）"""
         if not firebase_admin._apps:
             try:
-                if settings.firebase_credentials_path and os.path.exists(settings.firebase_credentials_path):
+                # エミュレータモードチェック（環境変数から）
+                firestore_emulator = os.environ.get('FIRESTORE_EMULATOR_HOST')
+                auth_emulator = os.environ.get('FIREBASE_AUTH_EMULATOR_HOST')
+
+                # エミュレータホストとポートを設定から環境変数に設定
+                if settings.firestore_emulator_host and settings.firestore_emulator_port:
+                    emulator_host = f"{settings.firestore_emulator_host}:{settings.firestore_emulator_port}"
+                    os.environ['FIRESTORE_EMULATOR_HOST'] = emulator_host
+                    firestore_emulator = emulator_host
+                    logger.info(f"Using Firestore emulator at {emulator_host}")
+
+                if settings.firebase_auth_emulator_host and settings.firebase_auth_emulator_port:
+                    auth_emulator_host = f"{settings.firebase_auth_emulator_host}:{settings.firebase_auth_emulator_port}"
+                    os.environ['FIREBASE_AUTH_EMULATOR_HOST'] = auth_emulator_host
+                    auth_emulator = auth_emulator_host
+                    logger.info(f"Using Firebase Auth emulator at {auth_emulator_host}")
+
+                # エミュレータモードの場合、認証情報なしで初期化
+                if firestore_emulator or auth_emulator:
+                    firebase_admin.initialize_app(options={'projectId': settings.firebase_project_id})
+                    logger.info(f"🔧 Firebase initialized in emulator mode for project: {settings.firebase_project_id}")
+                # 本番モード: 認証情報が必要
+                elif settings.firebase_credentials_path and os.path.exists(settings.firebase_credentials_path):
                     # サービスアカウントキーファイルから認証情報を読み込み
                     cred = credentials.Certificate(settings.firebase_credentials_path)
                     firebase_admin.initialize_app(cred)
@@ -38,11 +60,11 @@ class FirebaseAuth:
                     logger.info("Firebase initialized with environment variables")
                 else:
                     # 本番環境では認証情報が必須
-                    logger.error("No Firebase credentials provided for production environment")
+                    logger.error("No Firebase credentials or emulator configuration provided")
                     logger.error(f"Credentials path: {settings.firebase_credentials_path}")
-                    logger.error(f"Private key exists: {bool(settings.firebase_private_key)}")
-                    logger.error(f"Client email exists: {bool(settings.firebase_client_email)}")
-                    raise ValueError("Firebase credentials are required for production environment")
+                    logger.error(f"Firestore emulator host: {settings.firestore_emulator_host}:{settings.firestore_emulator_port}")
+                    logger.error(f"Auth emulator host: {settings.firebase_auth_emulator_host}:{settings.firebase_auth_emulator_port}")
+                    raise ValueError("Firebase credentials or emulator configuration required")
             except Exception as e:
                 logger.error(f"Failed to initialize Firebase: {e}")
                 raise

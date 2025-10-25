@@ -9,8 +9,14 @@ import {
   CardContent,
   Tabs,
   Tab,
-  CircularProgress
+  CircularProgress,
+  InputAdornment,
+  IconButton
 } from '@mui/material';
+import {
+  Visibility,
+  VisibilityOff
+} from '@mui/icons-material';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -55,10 +61,15 @@ export default function AuthForm({ onAuthStateChange }: AuthFormProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
     setError('');
+  };
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -117,7 +128,7 @@ export default function AuthForm({ onAuthStateChange }: AuthFormProps) {
     <Card sx={{ maxWidth: 400, mx: 'auto', mt: 4 }}>
       <CardContent>
         <Typography variant="h5" component="h1" gutterBottom align="center">
-          Firebase認証
+          {/* 広告を表示 */}
         </Typography>
         
         {error && (
@@ -147,11 +158,24 @@ export default function AuthForm({ onAuthStateChange }: AuthFormProps) {
             <TextField
               fullWidth
               label="パスワード"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               required
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="パスワードの表示/非表示"
+                      onClick={handleTogglePasswordVisibility}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               type="submit"
@@ -179,11 +203,24 @@ export default function AuthForm({ onAuthStateChange }: AuthFormProps) {
             <TextField
               fullWidth
               label="パスワード"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               required
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="パスワードの表示/非表示"
+                      onClick={handleTogglePasswordVisibility}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               type="submit"

@@ -6,6 +6,13 @@
 .env.local
 .env.*.local
 frontend/.env.local
+frontend/.firebase/
+
+claudedocs/
+CLAUDE.md
+
+.github/
+firebase
 
 # IDE/Editor settings
 .claude/

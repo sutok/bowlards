@@ -16,5 +16,9 @@ services:
       - APP_FIREBASE_AUTH_EMULATOR_PORT=29099
       - APP_FIREBASE_PROJECT_ID=demo-project  # エミュレーター用
       - APP_DEBUG=true
+      # CORS設定（JSON配列形式）
+      - APP_ALLOWED_ORIGINS=["http://localhost:3000","http://localhost:13000","http://localhost:11080","http://localhost:5000","http://127.0.0.1:5000","http://127.0.0.1:25000"]
+      # Google Application Credentials（エミュレータ用ダミー）
+      - GOOGLE_APPLICATION_CREDENTIALS=/tmp/dummy-credentials.json
     extra_hosts:
       - "host.docker.internal:host-gateway"  # Linux対応

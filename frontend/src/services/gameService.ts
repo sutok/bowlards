@@ -85,7 +85,7 @@ export const gameService = {
         }))
       });
 
-      const response = await apiClient.post<ApiResponse<Game>>('/games', requestData);
+      const response = await apiClient.post<ApiResponse<Game>>('/games/', requestData);
 
       if (response.data.success && response.data.data) {
         console.log('✅ バックエンドレスポンス:', response.data.data);

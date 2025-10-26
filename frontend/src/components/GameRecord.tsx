@@ -134,7 +134,7 @@ export default function GameRecord() {
     calculateTotalScore(updatedFrames);
     
     // // 全フレームのデータ保持状態をconsole.logで出力
-    console.log('=== 全フレームデータ ===', updatedFrames);
+    // console.log('=== 全フレームデータ ===', updatedFrames);
     
      setGame({
       ...game,
@@ -153,36 +153,36 @@ export default function GameRecord() {
 
       // Turkey（3連続ストライク）
       if (isTurkey(frames, i)) {
-        console.log('Turkey', i);
+        // console.log('Turkey', i);
         frames[i].frameScore = 30 + getLastScore(frames, i);
       }
       // Double（2連続ストライク）
       else if (isDouble(frames, i) && frames[i+1]?.firstRoll !== null && frames[i+1]?.firstRoll! < 10) {
-        console.log('Double', i);
+        // console.log('Double', i);
         frames[i].frameScore = 20 + (frames[i+1]?.firstRoll || 0) + getLastScore(frames, i);
       }
       // フレーム10 Single Strike + not strike 
       else if (i == 9 && isSingleStrike(frames, i)) {
-        console.log('Single Strike + not strike', i);
+        // console.log('Single Strike + not strike', i);
         frames[i].frameScore = 10 + (frames[i+1]?.firstRoll || 0) + (frames[i+1]?.secondRoll || 0) + getLastScore(frames, i);
       }
       // フレーム9以前 Single Strike + not strike 
       else if (i < 9 && isSingleStrike(frames, i) && frames[(i+1)].isCompleted == true) {
-        console.log('Single Strike + not strike', i);
+        // console.log('Single Strike + not strike', i);
         frames[i].frameScore = 10 + (frames[i+1]?.firstRoll || 0) + (frames[i+1]?.secondRoll || 0) + getLastScore(frames, i);
       }
       // Spare
       else if (isSpare(frames, i) && frames[(i+1)].isCompleted == true) {
-        console.log('Spare', i);
+        // console.log('Spare', i);
         frames[i].frameScore = 10 + (frames[i+1]?.firstRoll || 0) + getLastScore(frames, i);
       }
       // 通常のフレーム（N + M）
       else if (frames[i].isCompleted == true && frames[i].isStrike == false && frames[i].isSpare == false) {
-        console.log('通常のフレーム', i);
+        // console.log('通常のフレーム', i);
         frames[i].frameScore = (frames[i].firstRoll || 0) + (frames[i].secondRoll || 0) + getLastScore(frames, i);
       }
       
-      console.log('frames', i, frames[i].isCompleted, frames[i].frameScore);
+      // console.log('frames', i, frames[i].isCompleted, frames[i].frameScore);
     }
     return frames;
   };
@@ -192,7 +192,7 @@ export default function GameRecord() {
     if (frameIndex === 0) {
       return 0;
     }
-    console.log('getLastScore', frameIndex, frames[(frameIndex - 1)].frameScore);
+    // console.log('getLastScore', frameIndex, frames[(frameIndex - 1)].frameScore);
     return frames[(frameIndex - 1)].frameScore || 0;
   };
 
@@ -296,17 +296,17 @@ export default function GameRecord() {
         totalScore: finalTotalScore,
       };
 
-      console.log('💾 ゲーム保存リクエスト:', {
-        gameDate: completedGame.gameDate,
-        totalScore: completedGame.totalScore,
-        frames: completedGame.frames.length,
-        status: completedGame.status
-      });
+      // console.log('💾 ゲーム保存リクエスト:', {
+      //   gameDate: completedGame.gameDate,
+      //   totalScore: completedGame.totalScore,
+      //   frames: completedGame.frames.length,
+      //   status: completedGame.status
+      // });
 
       // バックエンドにゲームデータを保存
       const savedGame = await gameService.saveGame(completedGame);
       
-      console.log('✅ ゲームが保存されました:', savedGame);
+      // console.log('✅ ゲームが保存されました:', savedGame);
 
       // 状態を更新
       setGame(savedGame);
@@ -344,30 +344,30 @@ export default function GameRecord() {
         }
         // 通常の場合は1投目の残りピン数まで
         const maxPins = 10 - (frame.firstRoll || 0);
-        console.log(`10フレーム目2投目: 1投目=${frame.firstRoll}, 最大ピン数=${maxPins}`);
+        // console.log(`10フレーム目2投目: 1投目=${frame.firstRoll}, 最大ピン数=${maxPins}`);
         return maxPins;
       } else if (currentRoll === 3) {
         // 1投目がストライクの場合
         if (frame.firstRoll === 10) {
           // 2投目がストライク（10）の場合、3投目は0から10が選べる
           if (frame.secondRoll === 10) {
-            console.log('10フレーム目3投目: 1投目=X, 2投目=X → 最大ピン数=10');
+            // console.log('10フレーム目3投目: 1投目=X, 2投目=X → 最大ピン数=10');
             return 10;
           }
           // 2投目が0から9の場合、3投目は0から（10 - 2投目得点）が選べる
           else if (frame.secondRoll !== null && frame.secondRoll < 10) {
             const maxPins = 10 - frame.secondRoll;
-            console.log(`10フレーム目3投目: 1投目=X, 2投目=${frame.secondRoll} → 最大ピン数=${maxPins}`);
+            // console.log(`10フレーム目3投目: 1投目=X, 2投目=${frame.secondRoll} → 最大ピン数=${maxPins}`);
             return maxPins;
           }
         }
         // 1投目がストライク以外で2投目でスペアの場合、3投目は0から10が選べる
         else if (frame.isSpare) {
-          console.log(`10フレーム目3投目: 1投目=${frame.firstRoll}, 2投目でスペア → 最大ピン数=10`);
+          // console.log(`10フレーム目3投目: 1投目=${frame.firstRoll}, 2投目でスペア → 最大ピン数=10`);
           return 10;
         }
         // その他の場合（想定外のケース）
-        console.log('10フレーム目3投目: 想定外のケース → 最大ピン数=10');
+        // console.log('10フレーム目3投目: 想定外のケース → 最大ピン数=10');
         return 10;
       }
     }

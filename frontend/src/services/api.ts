@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import { auth } from '../firebase/config';
+import { auth } from '../firebase';
 
 // APIベースURL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:18080/api/v1';

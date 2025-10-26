@@ -11,9 +11,9 @@ services:
     environment:
       # Firebaseエミュレーター接続設定（APP_プレフィックス必須）
       - APP_FIRESTORE_EMULATOR_HOST=host.docker.internal
-      - APP_FIRESTORE_EMULATOR_PORT=8080
+      - APP_FIRESTORE_EMULATOR_PORT=28080
       - APP_FIREBASE_AUTH_EMULATOR_HOST=host.docker.internal
-      - APP_FIREBASE_AUTH_EMULATOR_PORT=9099
+      - APP_FIREBASE_AUTH_EMULATOR_PORT=29099
       - APP_FIREBASE_PROJECT_ID=demo-project  # エミュレーター用
       - APP_DEBUG=true
     extra_hosts:

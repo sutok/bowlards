@@ -31,7 +31,10 @@ class Settings(BaseSettings):
     allowed_origins: List[str] = [
         "http://localhost:3000",      # 直接アクセス（開発用）
         "http://localhost:13000",     # Dockerフロントエンド
-        "http://localhost:11080"      # Nginx経由
+        "http://localhost:11080",     # Nginx経由
+        "http://localhost:5000",      # Firebase Hosting Emulator
+        "http://127.0.0.1:5000",      # Firebase Hosting Emulator (127.0.0.1)
+        "http://127.0.0.1:25000"      # フロントエンド開発サーバー (127.0.0.1)
     ]
     allowed_methods: List[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     allowed_headers: List[str] = ["*"]

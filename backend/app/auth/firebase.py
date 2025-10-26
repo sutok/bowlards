@@ -19,9 +19,9 @@ class FirebaseAuth:
         """Firebase Admin SDKを初期化（エミュレータ対応）"""
         if not firebase_admin._apps:
             try:
-                # エミュレータモードチェック（環境変数から）
-                firestore_emulator = os.environ.get('FIRESTORE_EMULATOR_HOST')
-                auth_emulator = os.environ.get('FIREBASE_AUTH_EMULATOR_HOST')
+                # エミュレータ変数の初期化（未定義または空文字の場合はNone）
+                firestore_emulator = os.environ.get('FIRESTORE_EMULATOR_HOST') or None
+                auth_emulator = os.environ.get('FIREBASE_AUTH_EMULATOR_HOST') or None
 
                 # エミュレータホストとポートを設定から環境変数に設定
                 if settings.firestore_emulator_host and settings.firestore_emulator_port:
@@ -36,8 +36,10 @@ class FirebaseAuth:
                     auth_emulator = auth_emulator_host
                     logger.info(f"Using Firebase Auth emulator at {auth_emulator_host}")
 
-                # エミュレータモードの場合、認証情報なしで初期化
+                # エミュレータモードの場合、環境変数のダミー認証情報を使用
                 if firestore_emulator or auth_emulator:
+                    # GOOGLE_APPLICATION_CREDENTIALSから認証情報を読み込む
+                    # (Dockerfileで/tmp/dummy-credentials.jsonを作成済み)
                     firebase_admin.initialize_app(options={'projectId': settings.firebase_project_id})
                     logger.info(f"🔧 Firebase initialized in emulator mode for project: {settings.firebase_project_id}")
                 # 本番モード: 認証情報が必要

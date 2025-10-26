@@ -15,7 +15,7 @@ CLAUDE.md
 firebase
 
 # IDE/Editor settings
-.claude/
+.claude/*
 .cursor/
 .serena/
 .rules
